@@ -27,14 +27,7 @@ def get_dom(url: str) -> etree.Element:
     return etree.HTML(str(soup))
 
 
-def collect_wotd() -> Dict:
-    dom = get_dom(os.environ['WORD_SOURCE_URL'])
-
-    wotd_elem = dom.xpath('.//div[@id="wotd"]/div[@class="content_column"]')[0]
-
-    word = wotd_elem.xpath('./h1/a')[0].text
-    pos, definition = [x for x in wotd_elem.xpath('.//div[@id="define"]/div/ul/li')[0].itertext()]
-
+def collect_pron(word: str) -> str:
     # Try to get pronunciation
     pdom = get_dom(f'https://www.dictionary.com/browse/{word}')
 
@@ -51,11 +44,29 @@ def collect_wotd() -> Dict:
             continue
         if pe.tag == 'strong':
             if text_strip in pron:
-                pron[pron.index(text_strip)] = f'*{text_strip.upper()}*'
+                pron[pron.index(text_strip)] = f'{text_strip.upper()}'
+    if len(pron) == 0:
+        raise ValueError('No pronunciation elements retrieved!')
+    return ''.join(pron)
+
+
+def collect_wotd() -> Dict:
+    dom = get_dom(os.environ['WORD_SOURCE_URL'])
+
+    wotd_elem = dom.xpath('.//div[@id="wotd"]/div[@class="content_column"]')[0]
+
+    word = wotd_elem.xpath('./h1/a')[0].text
+    pos, definition = [x for x in wotd_elem.xpath('.//div[@id="define"]/div/ul/li')[0].itertext()]
+
+    try:
+        pron = collect_pron(word=word)
+    except Exception as e:
+        logger.error(f'Couldn\'t capture pronunciation: {e}')
+        pron = word
 
     return {
         'word': word,
-        'pronunciation': ''.join(pron),
+        'pronunciation': pron,
         'def': definition,
         'part_of_speech': pos,
         'origin': wotd_elem.xpath('.//p[@class="note"]')[0].text
@@ -83,7 +94,7 @@ def build_blocks(wotd_dict: Dict) -> List[Dict]:
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*{part_of_speech}* {def}".format(**wotd_dict),
+                "text": "*`{part_of_speech}`* {def}".format(**wotd_dict),
             }
         }, {
             "type": "context",
