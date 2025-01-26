@@ -131,5 +131,5 @@ if __name__ == '__main__':
 
     wotd = collect_wotd()
     blocks = build_blocks(wotd_dict=wotd)
-    # res = send_blocks_to_slack(blocks=blocks)
-    # logger.debug(f'HTTP response code from Slack: {res.status_code}')
+    res = send_blocks_to_slack(blocks=blocks)
+    logger.debug(f'HTTP response code from Slack: {res.status_code}')
