@@ -171,13 +171,14 @@ def build_blocks(word: str, pos: str, pronunciation: str, definitions: List[str]
         })
     _blocks.append({'type': 'divider'})
 
-    _blocks.append({
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": ':sparkles: *Etymology* :sparkles:',
-        }
-    })
+    if len(etymologies) > 0:
+        _blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ':sparkles: *Etymology* :sparkles:',
+            }
+        })
     # Build etymology
     for e in etymologies:
         _blocks.append({
