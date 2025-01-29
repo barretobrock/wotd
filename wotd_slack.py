@@ -105,7 +105,9 @@ def collect_wotd_wikt() -> List[Dict]:
     ety_elems = worddom.xpath('.//div[contains(@class, "mw-heading3")]/h3[starts-with(text(), "Etymology")]/parent::*/following-sibling::*')
     for elem in ety_elems:
         elem_type = elem.tag
-        if elem_type not in ['p', 'ul']:
+        if elem_type not in ['p', 'ul'] and elem_type != 'div':
+            continue
+        if elem_type == 'div':
             break
         if elem_type == 'ul':
             sub_elems = elem.xpath('./li')
