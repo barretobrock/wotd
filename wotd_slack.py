@@ -97,8 +97,9 @@ def collect_wotd_wikt() -> List[Dict]:
     pron = word
     for elem in pron_section.xpath('./li'):
         full_text = ''.join([x for x in elem.itertext()]).strip()
-        if 'American' in full_text:
-            pron = full_text[full_text.index(':') + 1:]
+        if 'American' in full_text and '/' in full_text:
+            pron = full_text[full_text.index(':') + 1:].strip()
+            break
 
     # Get Etymology
     etys = []
